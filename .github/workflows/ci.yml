@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet build src/Kneser/Kneser.csproj -c Release
+      - run: dotnet test testes/Kneser.Testes/Kneser.Testes.csproj -c Release
+      - run: dotnet run --project ferramentas/Medidor -c Release -- forma
+      - run: dotnet run --project ferramentas/Medidor -c Release -- cromatico
+      - run: dotnet run --project ferramentas/Medidor -c Release -- ordem
+      - run: dotnet run --project ferramentas/Medidor -c Release -- independente
+      - run: dotnet run --project ferramentas/Medidor -c Release -- construcoes
+      - run: dotnet run --project ferramentas/Medidor -c Release -- cota
